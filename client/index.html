@@ -1,0 +1,101 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Share videos with friends</title>
+        <link rel="stylesheet" href="style.css" />
+        <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+        <!-- axios script -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+        <!-- hls js -->
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+    </head>
+    <body>
+        <div class="app">
+            <h1>share and watch movies with friends</h1>
+            <p>you need to have direct link to the video like: site.com/movie.mp4</p>
+            <input type="text" placeholder="movie url" />
+            <button>submit</button>
+
+            <p class="roomId">room id:</p>
+            <hr />
+            <br />
+            <br />
+            <br />
+            <br />
+            <input class="watch_input" type="text" placeholder="room id" />
+            <button class="watch">watch stream</button>
+        </div>
+        <video id="video"></video>
+    </body>
+</html>
+
+<script>
+    let roomId;
+    io.connect("http://localhost:3000");
+    const btn = document.querySelector("button");
+    const input = document.querySelector("input");
+    btn.addEventListener("click", () => {
+        axios
+            .post("http://localhost:3000/createRoom", {
+                movie: input.value,
+            })
+            .then((res) => {
+                document.querySelector(".roomId").innerHTML = `room id: ${res.data.roomId}`;
+                roomId = res.data.roomId;
+            });
+    });
+
+    const watch_btn = document.querySelector(".watch");
+    watch_btn.addEventListener("click", () => {
+        const value = document.querySelector(".watch_input").value;
+        var video = document.getElementById("video");
+        var videoSrc = `http://localhost:3000/${value}/index.m3u8`;
+        //
+        // First check for native browser HLS support
+        //
+        if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = videoSrc;
+            //
+            // If no native HLS support, check if HLS.js is supported
+            //
+        } else if (Hls.isSupported()) {
+            var hls = new Hls({
+                maxBufferSize: 5,
+                liveDurationInfinity: true,
+            });
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            video.play();
+        }
+    });
+</script>
+
+<style>
+    .app {
+        width: 700px;
+        background: rgb(242, 242, 242);
+        padding: 50px;
+        border-radius: 7px;
+        text-align: center;
+    }
+
+    input {
+        margin: 20px 0;
+        padding: 15px;
+        width: 60%;
+    }
+
+    button {
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    #video {
+        width: 100%;
+        height: 100vh;
+    }
+</style>
