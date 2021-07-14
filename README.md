@@ -14,4 +14,4 @@ wait for the server to load the index.m3u8 file(check room directory) then press
 you need ffmpeg installed on your pc
 
 
-this is a very naive implementation just to show you how you can implement your vod/streaming service 
+this is a very naive implementation just to show you how you can implement your own vod/streaming service 
